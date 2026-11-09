@@ -33,19 +33,34 @@ export default function AppTabs() {
   );
 }
 
+
 export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+  // Adapt the Expo Router slot props to React Native Pressable props.
+  const pressableProps =
+    props as unknown as React.ComponentProps<typeof Pressable>;
+
   return (
-    <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable
+      {...pressableProps}
+      style={({ pressed }) => [
+        pressed ? styles.pressed : undefined,
+      ]}
+    >
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+        style={styles.tabButtonView}
+      >
+        <ThemedText
+          type="small"
+          themeColor={isFocused ? 'text' : 'textSecondary'}
+        >
           {children}
         </ThemedText>
       </ThemedView>
     </Pressable>
   );
 }
+
 
 export function CustomTabList(props: TabListProps) {
   const scheme = useColorScheme();
