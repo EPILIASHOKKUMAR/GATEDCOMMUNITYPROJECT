@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme";
-import BottomNavBar from "@/components/BottomNavBar";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 36;

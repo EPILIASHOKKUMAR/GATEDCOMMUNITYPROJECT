@@ -88,10 +88,6 @@ export default function BottomNavBar({
       tab.onPress();
       return;
     }
-    if (onTabPress) {
-      onTabPress(tab);
-      return;
-    }
     if (tab.route) {
       if (tab.key === activeTab) {
         return;
@@ -101,6 +97,10 @@ export default function BottomNavBar({
       } else {
         router.push(tab.route as any);
       }
+      return;
+    }
+    if (onTabPress) {
+      onTabPress(tab);
       return;
     }
     Alert.alert(tab.label, `${tab.label} feature coming soon.`);

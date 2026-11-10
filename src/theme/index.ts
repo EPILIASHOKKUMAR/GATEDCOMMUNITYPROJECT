@@ -7,6 +7,11 @@ import { Platform } from 'react-native';
  */
 
 export const colors = {
+  serviceTones: {
+    green: { foreground: '#07845B', background: '#F0FDF4', border: '#D1FAE0', iconBackground: '#DCFCE7' },
+    blue: { foreground: '#008ACB', background: '#F0F9FF', border: '#DCEFFF', iconBackground: '#E0F2FE' },
+    orange: { foreground: '#F05A0A', background: '#FFF8EF', border: '#FFEDD5', iconBackground: '#FFEDD5' },
+  },
   // Brand Greens
   primary: '#07845B',
   primaryDark: '#006747',

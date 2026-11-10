@@ -8,7 +8,7 @@ import TabHeader from '@/components/TabHeader';
 import Avatar from '@/components/Avatar';
 import ListRow from '@/components/ListRow';
 import AppButton from '@/components/AppButton';
-import BottomNavBar from '@/components/BottomNavBar';
+import { BottomNavBar } from '@/components/BottomNavBar';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
