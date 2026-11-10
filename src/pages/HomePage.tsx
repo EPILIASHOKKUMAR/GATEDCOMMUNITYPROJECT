@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 36;
@@ -701,6 +702,18 @@ const handleAction = (name: string) => {
         <View style={{ height: 18 }} />
       </ScrollView>
 
+<<<<<<< HEAD
+=======
+      {/* BOTTOM NAVIGATION */}
+      <BottomNavBar
+        activeTab="home"
+        onTabPress={(tab) => {
+          if (tab.key === 'sell') handleAction("Sell Property");
+          else if (tab.key === 'search') handleAction("Search");
+          else if (tab.key === 'activity') handleAction("Activity");
+        }}
+      />
+>>>>>>> origin/v1
     </SafeAreaView>
   );
 }
@@ -1292,7 +1305,10 @@ quickCard: {
     fontSize: 10,
     marginTop: 4,
   },
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/v1
 });
 export { HomePage, HomePage as HomeScreen };

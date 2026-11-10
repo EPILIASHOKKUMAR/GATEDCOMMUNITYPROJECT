@@ -3,7 +3,9 @@ import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors, radii, shadows, spacing, typography } from '@/theme';
+import { colors, radii } from '@/theme';
+import { BottomNavBar, type TabItem } from '@/components/BottomNavBar';
+import { ServicesPanel } from '@/components/ServicesPanel';
 
 type Icon = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 type Card = { title: string; icon: Icon; description: string; wide?: boolean };
@@ -130,84 +132,7 @@ const categories: Category[] = [
   {
     title: 'Services',
     icon: 'view-grid-outline',
-    groups: [
-      {
-        title: 'Services for your home',
-        cards: [
-          {
-            title: 'Home Interiors',
-            icon: 'sofa-outline',
-            description: 'Explore interior design services for your space.',
-          },
-          {
-            title: 'Maintenance',
-            icon: 'tools',
-            description: 'Explore help with home repairs and regular maintenance.',
-          },
-          {
-            title: 'Moving Services',
-            icon: 'truck-outline',
-            description: 'Discover assistance for moving into your next home.',
-          },
-          {
-            title: 'Home Loans',
-            icon: 'bank-outline',
-            description: 'Explore financing options for your home purchase.',
-          },
-        ],
-      },
-      {
-        title: 'Plan your property journey',
-        cards: [
-          {
-            title: 'EMI Calculator',
-            icon: 'calculator-variant-outline',
-            description: 'Plan monthly repayments based on your loan amount, interest rate and tenure.',
-          },
-          {
-            title: 'Property Value',
-            icon: 'chart-line',
-            description: 'Explore pricing information to understand property values.',
-          },
-          {
-            title: 'Loan Eligibility',
-            icon: 'bank-check',
-            description: 'Understand the factors that affect your home loan eligibility.',
-            wide: true,
-          },
-        ],
-      },
-      {
-        title: 'Your property journey',
-        cards: [
-          {
-            title: 'Saved Properties',
-            icon: 'heart-outline',
-            description: 'Keep your favourite properties together for easy comparison.',
-          },
-          {
-            title: 'My Listings',
-            icon: 'clipboard-text-outline',
-            description: 'Manage the properties you have listed on GatedPlus.',
-          },
-        ],
-      },
-      {
-        title: 'Here to help',
-        cards: [
-          {
-            title: 'Help Centre',
-            icon: 'help-circle-outline',
-            description: 'Find help with your account, property listings and GatedPlus services.',
-          },
-          {
-            title: 'Contact Support',
-            icon: 'headset',
-            description: 'Support contact options will appear here when the service is connected.',
-          },
-        ],
-      },
-    ],
+    groups: [],
   },
 ];
 
@@ -221,6 +146,15 @@ export default function MenuPage() {
     setSelected(index);
     content.current?.scrollTo({ y: 0, animated: false });
   }
+
+  const menuTabs: TabItem[] = [
+    { key: 'home', label: 'Home', icon: 'home-outline', route: '/home' },
+    { key: 'services', label: 'Services', icon: 'view-grid-outline', onPress: () => selectCategory(4) },
+    { key: 'post', label: 'Post', icon: 'plus-circle-outline', onPress: () => selectCategory(0) },
+    { key: 'activity', label: 'Activity', icon: 'heart-outline', onPress: () => setDetail({ title: 'Saved Properties', icon: 'heart-outline', description: 'Keep your favourite properties together for easy comparison.' }) },
+    { key: 'menu', label: 'Menu', icon: 'menu', activeIcon: 'menu', route: '/menu' },
+    { key: 'settings', label: 'Settings', icon: 'cog-outline', activeIcon: 'cog', route: '/settings' },
+  ];
 
   return (
     <SafeAreaView style={s.screen} edges={["top"]}>
@@ -262,7 +196,10 @@ export default function MenuPage() {
           contentContainerStyle={s.contentInner}
           showsVerticalScrollIndicator={false}
         >
-          {categories[selected].groups.map((group) => (
+          {selected === 4 ? <ServicesPanel onSelect={(service) => {
+            if (service.title === 'Protect My Property') router.push('/protect');
+            else setDetail(service);
+          }} /> : categories[selected].groups.map((group) => (
             <View key={group.title} style={s.group}>
               <Text style={s.groupTitle}>{group.title}</Text>
               <View style={s.grid}>
@@ -271,7 +208,23 @@ export default function MenuPage() {
                     key={card.title}
                     accessibilityRole="button"
                     accessibilityLabel={card.title}
-                    onPress={() => (selected === 1 ? router.push('/protect') : setDetail(card))}
+                   
+onPress={() => {
+  if (selected === 1) {
+    router.push('/protect');
+  } else if (selected === 3) {
+    if (card.title === 'My Friends') {
+      router.push('/my-friends');
+    } else if (card.title === 'Community Events') {
+      router.push('/community-events');
+    } else if (card.title === 'Community Groups') {
+      router.push('/community-groups');
+    }
+  } else {
+    setDetail(card);
+  }
+}}
+
                     style={({ pressed }) => [
                       s.card,
                       card.wide && s.wideCard,
@@ -291,6 +244,10 @@ export default function MenuPage() {
           ))}
         </ScrollView>
       </View>
+<<<<<<< HEAD
+=======
+      <BottomNavBar activeTab="menu" tabs={menuTabs} />
+>>>>>>> origin/v1
       <Modal
         visible={detail !== null}
         transparent

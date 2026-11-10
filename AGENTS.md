@@ -52,6 +52,7 @@ src/
 
 - **Avoid system UI collision**: Screens with bottom navigation or bottom action bars must account for Android 3-button navigation bars and iOS home indicators.
 - Use `<SafeAreaView edges={["top", "bottom"]}>` (or `useSafeAreaInsets()`) so that the bottom navigation sits properly above system navigation buttons.
+- **Centralized Bottom Navigation**: Always use the centralized `<BottomNavBar activeTab="..." />` component from `@/components/BottomNavBar` (or `@/components`). Do NOT create dispersed or duplicate bottom nav bars in individual page files.
 - Bottom navigation bars should use consistent dimensions matching the design pattern: `paddingVertical: 12`, item `minHeight: 44`, and border color `#E5ECF3` / `#E6ECF2` on white backgrounds.
 
 ## Tooling & Workflow

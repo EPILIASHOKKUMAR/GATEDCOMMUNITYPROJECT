@@ -8,6 +8,7 @@ import TabHeader from '@/components/TabHeader';
 import Avatar from '@/components/Avatar';
 import ListRow from '@/components/ListRow';
 import AppButton from '@/components/AppButton';
+import { BottomNavBar } from '@/components/BottomNavBar';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
@@ -113,39 +114,7 @@ export default function SettingsPage() {
       </ScrollView>
 
       {/* BOTTOM NAVIGATION BAR */}
-      <View style={styles.bottomNav}>
-        <Pressable
-          accessibilityRole="button"
-          style={styles.navItem}
-          onPress={() => router.replace('/home')}
-        >
-          <MaterialCommunityIcons name="home-outline" size={24} color="#7B8BA0" />
-          <Text style={styles.navLabel}>Home</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          style={styles.navItem}
-          onPress={() => router.push('/protect')}
-        >
-          <MaterialCommunityIcons name="shield-check-outline" size={24} color="#7B8BA0" />
-          <Text style={styles.navLabel}>Protect</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          style={styles.navItem}
-          onPress={() => router.push('/menu')}
-        >
-          <MaterialCommunityIcons name="menu" size={24} color="#7B8BA0" />
-          <Text style={styles.navLabel}>Menu</Text>
-        </Pressable>
-
-        <View accessibilityLabel="Settings, current page" style={styles.navItem}>
-          <MaterialCommunityIcons name="cog" size={24} color={colors.primary} />
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Settings</Text>
-        </View>
-      </View>
+      <BottomNavBar activeTab="settings" />
     </SafeAreaView>
   );
 }
@@ -185,25 +154,4 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: colors.border },
   logout: { marginTop: spacing.lg },
-
-  // BOTTOM NAVIGATION
-  bottomNav: {
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: '#E6ECF2',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 4,
-    paddingVertical: 12,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 44,
-    gap: 3,
-  },
-  navLabel: { fontSize: 11, color: '#7B8BA0' },
-  navLabelActive: { color: colors.primary, fontWeight: '700' },
 });
