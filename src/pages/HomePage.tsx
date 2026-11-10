@@ -193,16 +193,23 @@ export default function HomePage() {
   };
 
   // TEMPORARY BUTTON ACTION
-  const handleAction = (name: string) => {
-    if (name === "Protect Property") {
-      router.push("/protect");
-      return;
-    }
-    Alert.alert(
-      name,
-      "Coming soon"
-    );
-  };
+const handleAction = (name: string) => {
+  if (name === "Protect Property") {
+    router.push("/protect");
+    return;
+  }
+
+  if (name === "Refer & Earn") {
+    router.push("/Refer");
+    return;
+  }
+  if (name === "Refer & Earn") {
+    router.push("/my-friends");
+    return;
+  }
+
+  Alert.alert(name, "Coming soon");
+};
 
   // MANUAL CAROUSEL DOT
   const changeSlide = (index: number) => {

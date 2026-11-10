@@ -23,6 +23,7 @@ export default function RootLayout() {
         <Stack.Screen name="my-friends" options={{ headerShown: false }} />
         <Stack.Screen name="community-events" options={{ headerShown: false }} />
         <Stack.Screen name="community-groups" options={{ headerShown: false }} />
+        <Stack.Screen name="refer" options={{ headerShown: false }} />
 
       </Stack>
 
