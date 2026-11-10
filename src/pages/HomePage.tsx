@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors } from "@/theme";
+import BottomNavBar from "@/components/BottomNavBar";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 36;
@@ -689,87 +690,14 @@ export default function HomePage() {
       </ScrollView>
 
       {/* BOTTOM NAVIGATION */}
-      <View style={styles.bottomNav}>
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Home")}
-        >
-          <MaterialCommunityIcons
-            name="home"
-            size={25}
-            color={C.green}
-          />
-
-          <Text style={styles.navActiveText}>Home</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Search")}
-        >
-          <MaterialCommunityIcons
-            name="magnify"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Search</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Sell Property")}
-        >
-          <View style={styles.sellIcon}>
-            <MaterialCommunityIcons
-              name="plus"
-              size={22}
-              color={C.green}
-            />
-          </View>
-
-          <Text style={styles.navText}>Sell</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Activity")}
-        >
-          <MaterialCommunityIcons
-            name="heart-outline"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Activity</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => router.push("/menu")}
-        >
-          <MaterialCommunityIcons
-            name="menu"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Menu</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => router.push("/settings")}
-        >
-          <MaterialCommunityIcons
-            name="cog-outline"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Settings</Text>
-        </Pressable>
-      </View>
+      <BottomNavBar
+        activeTab="home"
+        onTabPress={(tab) => {
+          if (tab.key === 'sell') handleAction("Sell Property");
+          else if (tab.key === 'search') handleAction("Search");
+          else if (tab.key === 'activity') handleAction("Activity");
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -1357,53 +1285,6 @@ quickCard: {
     color: C.muted,
     fontSize: 10,
     marginTop: 4,
-  },
-
-  // BOTTOM NAVIGATION
-  bottomNav: {
-    backgroundColor: C.white,
-    borderTopWidth: 1,
-    borderTopColor: "#E6ECF2",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 4,
-    paddingVertical: 12,
-    elevation: 12,
-    shadowColor: "#183B5B",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 7,
-  },
-
-  navItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 44,
-    gap: 3,
-  },
-
-  navActiveText: {
-    color: C.green,
-    fontSize: 10,
-    fontWeight: "900",
-  },
-
-  navText: {
-    color: C.muted,
-    fontSize: 10,
-    fontWeight: "600",
-  },
-
-  sellIcon: {
-    width: 29,
-    height: 29,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: C.green,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
 

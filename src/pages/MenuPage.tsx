@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { colors, radii, shadows, spacing, typography } from '@/theme';
+import BottomNavBar, { TabItem } from '@/components/BottomNavBar';
 
 type Icon = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 type Card = { title: string; icon: Icon; description: string; wide?: boolean };
@@ -222,6 +223,15 @@ export default function MenuPage() {
     content.current?.scrollTo({ y: 0, animated: false });
   }
 
+  const menuTabs: TabItem[] = [
+    { key: 'home', label: 'Home', icon: 'home-outline', route: '/home' },
+    { key: 'services', label: 'Services', icon: 'view-grid-outline', onPress: () => selectCategory(4) },
+    { key: 'post', label: 'Post', icon: 'plus-circle-outline', onPress: () => selectCategory(0) },
+    { key: 'activity', label: 'Activity', icon: 'heart-outline', onPress: () => setDetail(categories[4].groups[2].cards[0]) },
+    { key: 'menu', label: 'Menu', icon: 'menu', activeIcon: 'menu', route: '/menu' },
+    { key: 'settings', label: 'Settings', icon: 'cog-outline', activeIcon: 'cog', route: '/settings' },
+  ];
+
   return (
     <SafeAreaView style={s.screen}>
       <StatusBar barStyle="dark-content" />
@@ -291,52 +301,7 @@ export default function MenuPage() {
           ))}
         </ScrollView>
       </View>
-      <View style={s.bottomBar}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.replace('/home')}
-          style={s.navItem}
-        >
-          <MaterialCommunityIcons name="home-outline" size={25} color="#7B8BA0" />
-          <Text style={s.navLabel}>Home</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => selectCategory(4)}
-          style={s.navItem}
-        >
-          <MaterialCommunityIcons name="view-grid-outline" size={25} color="#7B8BA0" />
-          <Text style={s.navLabel}>Services</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => selectCategory(0)}
-          style={s.navItem}
-        >
-          <MaterialCommunityIcons name="plus-circle-outline" size={25} color="#7B8BA0" />
-          <Text style={s.navLabel}>Post</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => setDetail(categories[4].groups[2].cards[0])}
-          style={s.navItem}
-        >
-          <MaterialCommunityIcons name="heart-outline" size={25} color="#7B8BA0" />
-          <Text style={s.navLabel}>Activity</Text>
-        </Pressable>
-        <View accessibilityLabel="Menu, current page" style={s.navItem}>
-          <MaterialCommunityIcons name="menu" size={25} color={colors.primary} />
-          <Text style={[s.navLabel, s.categoryLabelActive]}>Menu</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push('/settings')}
-          style={s.navItem}
-        >
-          <MaterialCommunityIcons name="cog-outline" size={25} color="#7B8BA0" />
-          <Text style={s.navLabel}>Settings</Text>
-        </Pressable>
-      </View>
+      <BottomNavBar activeTab="menu" tabs={menuTabs} />
       <Modal
         visible={detail !== null}
         transparent
@@ -425,14 +390,6 @@ const s = StyleSheet.create({
   wideCard: { width: '100%' },
   cardTitle: { color: colors.navy, fontSize: 13, lineHeight: 19, fontWeight: '500' },
   pressed: { opacity: 0.65 },
-  bottomBar: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#E5ECF3',
-    paddingVertical: 12,
-  },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 5, minHeight: 44 },
-  navLabel: { fontSize: 11, color: colors.textMuted },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(16,43,70,0.45)',
