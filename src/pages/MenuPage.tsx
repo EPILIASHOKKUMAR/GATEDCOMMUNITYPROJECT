@@ -208,7 +208,23 @@ export default function MenuPage() {
                     key={card.title}
                     accessibilityRole="button"
                     accessibilityLabel={card.title}
-                    onPress={() => (selected === 1 ? router.push('/protect') : setDetail(card))}
+                   
+onPress={() => {
+  if (selected === 1) {
+    router.push('/protect');
+  } else if (selected === 3) {
+    if (card.title === 'My Friends') {
+      router.push('/my-friends');
+    } else if (card.title === 'Community Events') {
+      router.push('/community-events');
+    } else if (card.title === 'Community Groups') {
+      router.push('/community-groups');
+    }
+  } else {
+    setDetail(card);
+  }
+}}
+
                     style={({ pressed }) => [
                       s.card,
                       card.wide && s.wideCard,
