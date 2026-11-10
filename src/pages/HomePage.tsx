@@ -22,6 +22,10 @@ import { colors } from "@/theme";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 36;
 
+// Keep the header balanced on narrow and wide phones.
+const HEADER_LOGO_WIDTH = Math.min(164, Math.max(96, SCREEN_WIDTH * 0.37));
+const COMPACT_HEADER = SCREEN_WIDTH < 380;
+
 const C = {
   green: colors.green,
   darkGreen: colors.darkGreen,
@@ -144,7 +148,9 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [quickActionsWidth, setQuickActionsWidth] = useState(SCREEN_WIDTH);
-  const quickCardWidth = Math.max(1, (quickActionsWidth - 34 - 20) / 3);
+  // Size cards so three are fully visible and roughly half of the next card
+  // peeks in from the right, making the horizontal carousel discoverable.
+  const quickCardWidth = Math.max(1, (quickActionsWidth - 34 - 30) / 3.5);
 
   // AUTOMATIC CAROUSEL
   useEffect(() => {
@@ -192,16 +198,19 @@ export default function HomePage() {
   };
 
   // TEMPORARY BUTTON ACTION
-  const handleAction = (name: string) => {
-    if (name === "Protect Property") {
-      router.push("/protect");
-      return;
-    }
-    Alert.alert(
-      name,
-      "Coming soon"
-    );
-  };
+const handleAction = (name: string) => {
+  if (name === "Protect Property") {
+    router.push("/protect");
+    return;
+  }
+
+  if (name === "Refer & Earn") {
+    router.push("/Refer");
+    return;
+  }
+
+  Alert.alert(name, "Coming soon");
+};
 
   // MANUAL CAROUSEL DOT
   const changeSlide = (index: number) => {
@@ -215,7 +224,7 @@ export default function HomePage() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
 
       {/* MAIN CONTENT */}
@@ -234,7 +243,7 @@ export default function HomePage() {
         >
           <Image
             source={require("@/assets/images/gatedplusLogo.jpeg")}
-            style={styles.brandLogo}
+            style={[styles.brandLogo, { width: HEADER_LOGO_WIDTH }]}
             resizeMode="contain"
           />
         </Pressable>
@@ -247,7 +256,11 @@ export default function HomePage() {
             style={({ pressed }) => [styles.protectButton, pressed && styles.cardPressed]}
           >
             <MaterialCommunityIcons name="shield-half-full" size={18} color={C.green} />
-            <Text style={styles.protectButtonText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+            <Text
+              style={styles.protectButtonText}
+              numberOfLines={1}
+              allowFontScaling={false}
+            >
               Protect Property
             </Text>
           </Pressable>
@@ -257,7 +270,7 @@ export default function HomePage() {
           >
             <MaterialCommunityIcons
               name="bell-outline"
-              size={23}
+              size={25}
               color={C.navy}
             />
 
@@ -423,7 +436,7 @@ export default function HomePage() {
                 >
                   <MaterialCommunityIcons
                     name={item.icon as any}
-                    size={29}
+                    size={24}
                     color={item.color}
                   />
                 </View>
@@ -688,88 +701,6 @@ export default function HomePage() {
         <View style={{ height: 18 }} />
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION */}
-      <View style={styles.bottomNav}>
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Home")}
-        >
-          <MaterialCommunityIcons
-            name="home"
-            size={25}
-            color={C.green}
-          />
-
-          <Text style={styles.navActiveText}>Home</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Search")}
-        >
-          <MaterialCommunityIcons
-            name="magnify"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Search</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Sell Property")}
-        >
-          <View style={styles.sellIcon}>
-            <MaterialCommunityIcons
-              name="plus"
-              size={22}
-              color={C.green}
-            />
-          </View>
-
-          <Text style={styles.navText}>Sell</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => handleAction("Activity")}
-        >
-          <MaterialCommunityIcons
-            name="heart-outline"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Activity</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => router.push("/menu")}
-        >
-          <MaterialCommunityIcons
-            name="menu"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Menu</Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.navItem}
-          onPress={() => router.push("/settings")}
-        >
-          <MaterialCommunityIcons
-            name="cog-outline"
-            size={25}
-            color={C.muted}
-          />
-
-          <Text style={styles.navText}>Settings</Text>
-        </Pressable>
-      </View>
     </SafeAreaView>
   );
 }
@@ -783,10 +714,10 @@ const styles = StyleSheet.create({
 
   // HEADER
   header: {
-    minHeight: 77,
-    paddingHorizontal: 15,
-    paddingTop: 7,
-    paddingBottom: 9,
+    minHeight: 74,
+    paddingHorizontal: COMPACT_HEADER ? 9 : 14,
+    paddingTop: 6,
+    paddingBottom: 6,
     backgroundColor: C.white,
     flexDirection: "row",
     alignItems: "center",
@@ -796,15 +727,16 @@ const styles = StyleSheet.create({
   },
 
   headerBrand: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
-    flexShrink: 1,
+    marginRight: COMPACT_HEADER ? 5 : 8,
   },
 
   brandLogo: {
-    width: 152,
-    height: 33,
+    height: 36,
+    maxWidth: "100%",
   },
 
   brandMark: {
@@ -833,18 +765,19 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    flexShrink: 1,
-    marginLeft: 8,
+    gap: COMPACT_HEADER ? 5 : 8,
+    flexShrink: 0,
+    marginLeft: 0,
   },
 
   protectButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
-    minHeight: 44,
-    paddingHorizontal: 10,
+    gap: 4,
+    minHeight: 42,
+    paddingHorizontal: COMPACT_HEADER ? 8 : 11,
+    maxWidth: COMPACT_HEADER ? 120 : 154,
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#8AE4C3",
@@ -854,14 +787,15 @@ const styles = StyleSheet.create({
 
   protectButtonText: {
     color: C.navy,
-    fontSize: 12,
+    fontSize: COMPACT_HEADER ? 11 : 13,
     fontWeight: "700",
     flexShrink: 1,
+    includeFontPadding: false,
   },
 
   notificationButton: {
-    width: 37,
-    height: 37,
+    width: 40,
+    height: 40,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: C.border,
@@ -1078,7 +1012,7 @@ const styles = StyleSheet.create({
   // QUICK ACTIONS - FIRST ROW
   quickActionsRow: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     paddingHorizontal: 17,
     paddingTop: 17,
     paddingBottom: 10,
@@ -1104,9 +1038,9 @@ quickCard: {
   },
 
   quickIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 19,
+    width: 52,
+    height: 52,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
@@ -1359,52 +1293,6 @@ quickCard: {
     marginTop: 4,
   },
 
-  // BOTTOM NAVIGATION
-  bottomNav: {
-    backgroundColor: C.white,
-    borderTopWidth: 1,
-    borderTopColor: "#E6ECF2",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 4,
-    paddingVertical: 12,
-    elevation: 12,
-    shadowColor: "#183B5B",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 7,
-  },
 
-  navItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 44,
-    gap: 3,
-  },
-
-  navActiveText: {
-    color: C.green,
-    fontSize: 10,
-    fontWeight: "900",
-  },
-
-  navText: {
-    color: C.muted,
-    fontSize: 10,
-    fontWeight: "600",
-  },
-
-  sellIcon: {
-    width: 29,
-    height: 29,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: C.green,
-    alignItems: "center",
-    justifyContent: "center",
-  },
 });
-
 export { HomePage, HomePage as HomeScreen };

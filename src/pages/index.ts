@@ -1,4 +1,5 @@
 export { default as NotFoundPage } from './NotFoundPage';
+export { default } from '@/pages/LandingPage';
 export { default as LandingPage, LandingPage as LoginScreen } from './LandingPage';
 export { default as HomePage, HomePage as HomeScreen } from './HomePage';
 export { default as MenuPage, MenuPage as MenuScreen } from './MenuPage';
