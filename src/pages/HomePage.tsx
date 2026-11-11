@@ -200,12 +200,19 @@ export default function HomePage() {
 
   // TEMPORARY BUTTON ACTION
 const handleAction = (name: string) => {
-  if (name === "Protect Property") {
+  const action = name.trim().toLowerCase().replace(/\s+/g, " ");
+
+  if (action === "protect property") {
     router.push("/protect");
     return;
   }
 
-  if (name === "Refer & Earn") {
+  if (action === "friends community") {
+    router.push("/friends-community");
+    return;
+  }
+
+  if (action === "refer & earn") {
     router.push("/Refer");
     return;
   }
