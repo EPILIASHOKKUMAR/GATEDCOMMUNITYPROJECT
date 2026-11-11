@@ -1,24 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ImageBackground,
-  Image,
-  TextInput,
-  Pressable,
-  StatusBar,
-  Dimensions,
   Alert,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
+import { BottomNavBar } from "@/components/BottomNavBar";
+import { colors } from "@/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors } from "@/theme";
-import { BottomNavBar } from "@/components/BottomNavBar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CAROUSEL_WIDTH = SCREEN_WIDTH - 36;
@@ -702,8 +702,6 @@ const handleAction = (name: string) => {
         <View style={{ height: 18 }} />
       </ScrollView>
 
-<<<<<<< HEAD
-=======
       {/* BOTTOM NAVIGATION */}
       <BottomNavBar
         activeTab="home"
@@ -713,7 +711,6 @@ const handleAction = (name: string) => {
           else if (tab.key === 'activity') handleAction("Activity");
         }}
       />
->>>>>>> origin/v1
     </SafeAreaView>
   );
 }
@@ -1305,10 +1302,7 @@ quickCard: {
     fontSize: 10,
     marginTop: 4,
   },
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/v1
 });
+
 export { HomePage, HomePage as HomeScreen };
+

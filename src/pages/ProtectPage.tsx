@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import {
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    Alert,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 
+import { BottomNavBar } from "@/components/BottomNavBar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const C = {
@@ -78,17 +79,14 @@ export default function ProtectPage() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <Stack.Screen
         options={{
           headerShown: false,
         }}
       />
 
-      <StatusBar
-        backgroundColor={C.background}
-        barStyle="dark-content"
-      />
+      <StatusBar style="dark" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -468,6 +466,7 @@ export default function ProtectPage() {
         </View>
       </Modal>
 
+      <BottomNavBar activeTab="protect" />
     </SafeAreaView>
   );
 }

@@ -1,23 +1,11 @@
-<<<<<<< HEAD
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Stack, usePathname } from 'expo-router';
-=======
-
-import { colors } from '@/theme';
-import { Stack } from 'expo-router';
->>>>>>> origin/v1
-import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/context/AuthContext';
 import { colors } from '@/theme';
-import BottomNavigation from '../components/BottomNavigation';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
-function AppNavigator() {
-  const pathname = usePathname();
-  const showBottomNavigation = pathname !== '/' && pathname !== '/index';
-
+export default function RootLayout() {
   return (
-    <View style={styles.container}>
+    <AuthProvider>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -31,38 +19,12 @@ function AppNavigator() {
         <Stack.Screen name="explore" options={{ headerShown: false }} />
         <Stack.Screen name="protect" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
-<<<<<<< HEAD
         <Stack.Screen name="Refer" options={{ headerShown: false }} />
-      </Stack>
-
-      {showBottomNavigation && <BottomNavigation />}
-    </View>
-  );
-}
-
-export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <AppNavigator />
-=======
         <Stack.Screen name="my-friends" options={{ headerShown: false }} />
         <Stack.Screen name="community-events" options={{ headerShown: false }} />
         <Stack.Screen name="community-groups" options={{ headerShown: false }} />
-
       </Stack>
-
->>>>>>> origin/v1
       <StatusBar style="dark" />
     </AuthProvider>
   );
 }
-<<<<<<< HEAD
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-});
-=======
->>>>>>> origin/v1

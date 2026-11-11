@@ -1,19 +1,22 @@
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TextInput,
-  StyleSheet,
-  StatusBar,
-  Alert,
-  Animated,
-  Easing,
+    Alert,
+    Animated,
+    Easing,
+    Pressable,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 
+import { BottomNavBar } from "@/components/BottomNavBar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ReferralType = "OWNER" | "CUSTOMER";
 
@@ -95,6 +98,7 @@ const steps = [
 export default function ReferralHomeScreen({
   onOpenReferModal,
 }: Props) {
+  const router = useRouter();
   const [activitySearch, setActivitySearch] = useState("");
   const [activityFilter, setActivityFilter] =
     useState<ReferralFilter>("All Status");
@@ -144,8 +148,19 @@ export default function ReferralHomeScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
     <StatusBar barStyle="dark-content" />
+
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <MaterialCommunityIcons name="arrow-left" size={25} color="#142238" />
+        </Pressable>
+        <View style={styles.headerText}>
+          <Text style={styles.headerTitle}>Refer & Earn</Text>
+          <Text style={styles.headerSubtitle}>Earn rewards with every referral</Text>
+        </View>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -408,7 +423,9 @@ export default function ReferralHomeScreen({
         </View>
 
       </ScrollView>
-    </View>
+
+      <BottomNavBar activeTab="menu" />
+    </SafeAreaView>
   );
 }
 
@@ -419,6 +436,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8FBF9",
+  },
+
+  // HEADER
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9EEF3',
+  },
+
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  headerText: {
+    flex: 1,
+    marginLeft: 10,
+  },
+
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#142238',
+  },
+
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#778397',
+    marginTop: 2,
   },
 
   scrollContent: {
@@ -856,3 +909,5 @@ const styles = StyleSheet.create({
   },
 
 });
+
+export { ReferralHomeScreen as ReferAndEarnPage };

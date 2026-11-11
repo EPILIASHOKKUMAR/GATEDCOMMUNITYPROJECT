@@ -1,11 +1,11 @@
+import { BottomNavBar, type TabItem } from '@/components/BottomNavBar';
+import { ServicesPanel } from '@/components/ServicesPanel';
+import { colors, radii } from '@/theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { colors, radii } from '@/theme';
-import { BottomNavBar, type TabItem } from '@/components/BottomNavBar';
-import { ServicesPanel } from '@/components/ServicesPanel';
 
 type Icon = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 type Card = { title: string; icon: Icon; description: string; wide?: boolean };
@@ -214,11 +214,11 @@ onPress={() => {
     router.push('/protect');
   } else if (selected === 3) {
     if (card.title === 'My Friends') {
-      router.push('/my-friends');
+      router.push('/my-friends' as any);
     } else if (card.title === 'Community Events') {
-      router.push('/community-events');
+      router.push('/community-events' as any);
     } else if (card.title === 'Community Groups') {
-      router.push('/community-groups');
+      router.push('/community-groups' as any);
     }
   } else {
     setDetail(card);
@@ -244,10 +244,7 @@ onPress={() => {
           ))}
         </ScrollView>
       </View>
-<<<<<<< HEAD
-=======
       <BottomNavBar activeTab="menu" tabs={menuTabs} />
->>>>>>> origin/v1
       <Modal
         visible={detail !== null}
         transparent
