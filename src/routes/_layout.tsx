@@ -18,6 +18,13 @@ export default function RootLayout() {
         <Stack.Screen name="menu" options={{ headerShown: false }} />
         <Stack.Screen name="explore" options={{ headerShown: false }} />
         <Stack.Screen name="protect" options={{ headerShown: false }} />
+        <Stack.Screen name="list-property" options={{ headerShown: false }} />
+        <Stack.Screen name="add-property" options={{ headerShown: false }} />
+        <Stack.Screen name="saved-properties" options={{ headerShown: false }} />
+        <Stack.Screen name="payment" options={{ headerShown: false }} />
+        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="active-protection" options={{ headerShown: false }} />
+        <Stack.Screen name="property-reports" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="Refer" options={{ headerShown: false }} />
         <Stack.Screen name="my-friends" options={{ headerShown: false }} />

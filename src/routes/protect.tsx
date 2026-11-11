@@ -1,1 +1,1 @@
-export { default } from '@/pages/ProtectPage';
+export { default } from '@/pages/ProtectProperty/ProtectPage';

@@ -1,4 +1,5 @@
 ## Author: Preetham Lanka
+## Date : 10th Nov 2026
 ## Bottom Nav Bar :
  - Created a bottom nav bar in E:\GatedPlus\GP-Mobile\working\src\components\BottomNavBar.tsx and using the component in the pages. 
  - example in @src\pages\HomePage.tsx: 
