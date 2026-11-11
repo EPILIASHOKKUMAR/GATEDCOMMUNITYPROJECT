@@ -25,6 +25,10 @@ export default function RootLayout() {
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
         <Stack.Screen name="active-protection" options={{ headerShown: false }} />
         <Stack.Screen name="property-reports" options={{ headerShown: false }} />
+        <Stack.Screen name="services" options={{ headerShown: false }} />
+        <Stack.Screen name="legal" options={{ headerShown: false }} />
+        <Stack.Screen name="registration" options={{ headerShown: false }} />
+        <Stack.Screen name="financial" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ headerShown: false }} />
         <Stack.Screen name="Refer" options={{ headerShown: false }} />
         <Stack.Screen name="my-friends" options={{ headerShown: false }} />
@@ -32,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="community-groups" options={{ headerShown: false }} />
         <Stack.Screen name="friends-community" options={{ headerShown: false }}
 />
+
       </Stack>
       <StatusBar style="dark" />
     </AuthProvider>

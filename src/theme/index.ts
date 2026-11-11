@@ -7,6 +7,18 @@ import { Platform } from 'react-native';
  */
 
 export const colors = {
+  financial: { background: '#131E30', surface: '#303B4D', border: '#536073', accent: '#FF4E58', primary: '#DF1926', badge: '#392330', badgeBorder: '#702333', muted: '#9AADC2' },
+  legal: {
+    background: '#081824',
+    surface: '#0B1E30',
+    featured: '#102D47',
+    border: '#173952',
+    accent: '#0DB98B',
+    accentSoft: '#0B343A',
+    muted: '#99AABC',
+    secondary: '#152532',
+    secondaryBorder: '#344553',
+  },
   serviceTones: {
     green: { foreground: '#07845B', background: '#F0FDF4', border: '#D1FAE0', iconBackground: '#DCFCE7' },
     blue: { foreground: '#008ACB', background: '#F0F9FF', border: '#DCEFFF', iconBackground: '#E0F2FE' },

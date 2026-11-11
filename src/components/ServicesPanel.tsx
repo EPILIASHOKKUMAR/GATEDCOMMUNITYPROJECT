@@ -2,42 +2,17 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors, radii, spacing, typography } from '@/theme';
+import { propertyServices, type PropertyService } from '@/constants/services';
 
-type Service = {
-  title: string;
-  description: string;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
-};
+const groups = [{
+  title: 'Property Services',
+  description: 'Essential services for property owners',
+  icon: 'home' as const,
+  tone: 'green' as const,
+  services: propertyServices,
+}];
 
-const groups: { title: string; description: string; icon: Service['icon']; tone: 'green' | 'blue' | 'orange'; services: Service[] }[] = [
-  {
-    title: 'Property Services', description: 'Essential services for property owners', icon: 'home', tone: 'green',
-    services: [
-      { title: 'Protect My Property', description: 'Keep your property safe and protected', icon: 'shield-half-full' },
-      { title: 'Legal', description: 'Legal verification & counsel', icon: 'scale-balance' },
-      { title: 'Registration Help', description: 'Property registration assistance', icon: 'file-document-outline' },
-      { title: 'Financial Help', description: 'Loans & financing guidance', icon: 'currency-inr' },
-    ],
-  },
-  {
-    title: 'Business & Professionals', description: 'Grow your business with GatedPlus', icon: 'account-group', tone: 'blue',
-    services: [
-      { title: 'Join as Agent', description: 'Grow your real-estate business', icon: 'account-tie' },
-      { title: 'Join as Vendor', description: 'Broker, Construction, Legal, Finance', icon: 'hard-hat' },
-      { title: 'Man Power', description: 'Skilled manpower & labour supply', icon: 'account-group' },
-      { title: 'Investors', description: 'Verified investment opportunities', icon: 'chart-line' },
-    ],
-  },
-  {
-    title: 'Property Opportunities', description: 'More ways to explore and grow', icon: 'view-grid', tone: 'orange',
-    services: [
-      { title: 'Unfinished to Finished', description: 'List unfinished property & get funding', icon: 'drawing' },
-      { title: 'Build Website', description: 'Custom website development', icon: 'monitor-dashboard' },
-    ],
-  },
-];
-
-export function ServicesPanel({ onSelect }: { onSelect: (service: Service) => void }) {
+export function ServicesPanel({ onSelect }: { onSelect: (service: PropertyService) => void }) {
   return (
     <View style={s.panel}>
       {groups.map((group) => {

@@ -16,6 +16,10 @@ export { default as PaymentPage, PaymentPage as PaymentScreen } from './ProtectP
 export { default as Dashboard, Dashboard as DashboardScreen } from './ProtectProperty/Dashboard';
 export { default as ActiveProtection, ActiveProtection as ActiveProtectionScreen } from './ProtectProperty/ActiveProtection';
 export { default as PropertyReports, PropertyReports as PropertyReportsScreen } from './ProtectProperty/PropertyReports';
+export { default as ServicesPage } from './ServicesPage';
+export { default as LegalPage } from './LegalPage';
+export { default as RegistrationPage } from './RegistrationPage';
+export { default as FinancialPage } from './FinancialPage';
 
 // Friends Community Pages
 export { default as CommunityEventsPage } from './FriendsCommunity/CommunityEventsPage';

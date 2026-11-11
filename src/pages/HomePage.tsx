@@ -202,6 +202,11 @@ export default function HomePage() {
 const handleAction = (name: string) => {
   const action = name.trim().toLowerCase().replace(/\s+/g, " ");
 
+  if (action === "services") {
+    router.push("/services");
+    return;
+  }
+
   if (action === "protect property") {
     router.push("/protect");
     return;

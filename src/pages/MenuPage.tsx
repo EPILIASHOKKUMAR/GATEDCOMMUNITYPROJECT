@@ -198,6 +198,9 @@ export default function MenuPage() {
         >
           {selected === 4 ? <ServicesPanel onSelect={(service) => {
             if (service.title === 'Protect My Property') router.push('/protect');
+            else if (service.title === 'Legal') router.push('/legal');
+            else if (service.title === 'Registration Help') router.push('/registration');
+            else if (service.title === 'Financial Help') router.push('/financial');
             else setDetail(service);
           }} /> : categories[selected].groups.map((group) => (
             <View key={group.title} style={s.group}>
