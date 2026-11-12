@@ -10,7 +10,6 @@ import {
     View,
 } from "react-native";
 
-import { BottomNavBar } from "@/components/BottomNavBar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -79,7 +78,7 @@ export default function ProtectPage() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <Stack.Screen
         options={{
           headerShown: false,
@@ -466,7 +465,7 @@ export default function ProtectPage() {
         </View>
       </Modal>
 
-      <BottomNavBar activeTab="protect" />
+      {/* BOTTOM NAVIGATION rendered in layout */}
     </SafeAreaView>
   );
 }
@@ -572,7 +571,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingHorizontal: 18,
-    paddingBottom: 35,
+    paddingBottom: 90,
   },
 
   header: {

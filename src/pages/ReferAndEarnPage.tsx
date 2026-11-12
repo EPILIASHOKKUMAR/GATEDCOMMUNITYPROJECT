@@ -1,29 +1,23 @@
-
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-    Alert,
-    Animated,
-    Easing,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Animated,
+  Easing,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
-import { BottomNavBar } from "@/components/BottomNavBar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ReferralType = "OWNER" | "CUSTOMER";
-
-interface Props {
-  onOpenReferModal?: (type: ReferralType) => void;
-}
-
 type ReferralStatus = "Pending" | "Contacted" | "Completed";
 type ReferralFilter = "All Status" | ReferralStatus;
 type ReferralTypeFilter = "All Types" | "Owner" | "Customer";
@@ -36,7 +30,7 @@ type ReferralRecord = {
   status: ReferralStatus;
 };
 
-const referralRecords: ReferralRecord[] = [
+const initialReferralRecords: ReferralRecord[] = [
   {
     id: 1,
     name: "Rahul Kumar",
@@ -68,43 +62,58 @@ const rewardStats = [
 ];
 
 const steps = [
-  {
-    number: "01",
-    icon: "account-plus-outline" as const,
-    title: "Choose Who to Refer",
-  },
-  {
-    number: "02",
-    icon: "file-document-edit-outline" as const,
-    title: "Submit Basic Details",
-  },
-  {
-    number: "03",
-    icon: "account-tie-outline" as const,
-    title: "Specialist Follow-Up",
-  },
-  {
-    number: "04",
-    icon: "handshake-outline" as const,
-    title: "Deal Closure",
-  },
-  {
-    number: "05",
-    icon: "gift-outline" as const,
-    title: "Receive Cash Reward",
-  },
+  { number: "01", icon: "account-plus-outline" as const, title: "Choose Who to Refer" },
+  { number: "02", icon: "file-document-edit-outline" as const, title: "Submit Basic Details" },
+  { number: "03", icon: "account-tie-outline" as const, title: "Specialist Follow-Up" },
+  { number: "04", icon: "handshake-outline" as const, title: "Deal Closure" },
+  { number: "05", icon: "gift-outline" as const, title: "Receive Cash Reward" },
 ];
 
-export default function ReferralHomeScreen({
-  onOpenReferModal,
-}: Props) {
-  const router = useRouter();
+const propertyTypes = [
+  { label: "Apartment / Flat", icon: "office-building" as const },
+  { label: "Independent House", icon: "home-outline" as const },
+  { label: "Villa", icon: "home-variant-outline" as const },
+  { label: "Commercial Space", icon: "storefront-outline" as const },
+  { label: "Plot", icon: "map-marker-radius-outline" as const },
+];
+
+const budgetOptions = [
+  "Below ₹10,000",
+  "₹10,000 - ₹20,000",
+  "₹20,000 - ₹30,000",
+  "₹30,000 - ₹50,000",
+  "₹50,000 - ₹75,000",
+  "₹75,000 - ₹1 Lakh",
+  "₹1 Lakh - ₹2 Lakhs",
+  "Above ₹2 Lakhs",
+];
+
+export default function ReferralHomeScreen() {
   const [activitySearch, setActivitySearch] = useState("");
-  const [activityFilter, setActivityFilter] =
-    useState<ReferralFilter>("All Status");
-  const [activityTypeFilter, setActivityTypeFilter] =
-    useState<ReferralTypeFilter>("All Types");
+  const [activityFilter, setActivityFilter] = useState<ReferralFilter>("All Status");
+  const [activityTypeFilter, setActivityTypeFilter] = useState<ReferralTypeFilter>("All Types");
+  const [referrals, setReferrals] = useState<ReferralRecord[]>(initialReferralRecords);
+
+  // Property Modal States
+  const [propertyModalVisible, setPropertyModalVisible] = useState(false);
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerMobile, setOwnerMobile] = useState("");
+  const [propertyLocation, setPropertyLocation] = useState("");
+  const [selectedPropertyType, setSelectedPropertyType] = useState("");
+  const [ownerNotes, setOwnerNotes] = useState("");
+
+  // Customer Modal States
+  const [customerModalVisible, setCustomerModalVisible] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+  const [customerMobile, setCustomerMobile] = useState("");
+  const [desiredArea, setDesiredArea] = useState("");
+  const [customerPropertyType, setCustomerPropertyType] = useState("");
+  const [customerBudget, setCustomerBudget] = useState("");
+  const [customerNotes, setCustomerNotes] = useState("");
+  const [budgetDropdownVisible, setBudgetDropdownVisible] = useState(false);
+
   const coinRotation = useRef(new Animated.Value(0)).current;
+  const formIconScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -119,10 +128,25 @@ export default function ReferralHomeScreen({
     return () => animation.stop();
   }, [coinRotation]);
 
+  useEffect(() => {
+    if (!propertyModalVisible && !customerModalVisible) {
+      formIconScale.setValue(1);
+      return;
+    }
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(formIconScale, { toValue: 1.08, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(formIconScale, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [propertyModalVisible, customerModalVisible, formIconScale]);
+
   const filteredReferrals = useMemo(() => {
     const query = activitySearch.trim().toLowerCase();
 
-    return referralRecords.filter((item) => {
+    return referrals.filter((item) => {
       const matchesSearch =
         item.name.toLowerCase().includes(query) ||
         item.property.toLowerCase().includes(query);
@@ -134,40 +158,82 @@ export default function ReferralHomeScreen({
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [activitySearch, activityFilter, activityTypeFilter]);
+  }, [activitySearch, activityFilter, activityTypeFilter, referrals]);
 
-  const handleReferral = (type: ReferralType) => {
-    if (onOpenReferModal) {
-      onOpenReferModal(type);
+  const handleOpenModal = (type: ReferralType) => {
+    if (type === "OWNER") {
+      setPropertyModalVisible(true);
     } else {
-      Alert.alert(
-        type === "OWNER" ? "Refer a Property" : "Refer a Customer",
-        "The referral form will be connected here."
-      );
+      setCustomerModalVisible(true);
     }
   };
 
+  const submitPropertyReferral = () => {
+    if (!ownerName.trim() || !ownerMobile.trim() || !propertyLocation.trim() || !selectedPropertyType) {
+      Alert.alert("Missing Details", "Please fill in all required fields.");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(ownerMobile)) {
+      Alert.alert("Invalid Mobile Number", "Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+
+    const newRecord: ReferralRecord = {
+      id: Date.now(),
+      name: ownerName.trim(),
+      type: "Owner",
+      property: selectedPropertyType,
+      status: "Pending",
+    };
+
+    setReferrals((prev) => [newRecord, ...prev]);
+    setPropertyModalVisible(false);
+    setOwnerName("");
+    setOwnerMobile("");
+    setPropertyLocation("");
+    setSelectedPropertyType("");
+    setOwnerNotes("");
+
+    Alert.alert("Referral Submitted!", "Your property referral has been added successfully.");
+  };
+
+  const submitCustomerReferral = () => {
+    if (!customerName.trim() || !customerMobile.trim() || !desiredArea.trim() || !customerPropertyType || !customerBudget) {
+      Alert.alert("Missing Details", "Please fill in all required customer details.");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(customerMobile)) {
+      Alert.alert("Invalid Mobile Number", "Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+
+    const newRecord: ReferralRecord = {
+      id: Date.now(),
+      name: customerName.trim(),
+      type: "Customer",
+      property: `${customerPropertyType} - ${customerBudget}`,
+      status: "Pending",
+    };
+
+    setReferrals((prev) => [newRecord, ...prev]);
+    setCustomerModalVisible(false);
+    setCustomerName("");
+    setCustomerMobile("");
+    setDesiredArea("");
+    setCustomerPropertyType("");
+    setCustomerBudget("");
+    setCustomerNotes("");
+    setBudgetDropdownVisible(false);
+
+    Alert.alert("Referral Submitted!", "Your customer referral has been added successfully.");
+  };
+
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-    <StatusBar barStyle="dark-content" />
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
 
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={25} color="#142238" />
-        </Pressable>
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle}>Refer & Earn</Text>
-          <Text style={styles.headerSubtitle}>Earn rewards with every referral</Text>
-        </View>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-
-        {/* PREMIUM REFERRAL HERO */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* HERO SECTION */}
         <View style={styles.heroCard}>
           <View style={styles.badge}>
             <MaterialCommunityIcons name="gift-outline" size={20} color="#D99A12" />
@@ -176,15 +242,12 @@ export default function ReferralHomeScreen({
 
           <View style={styles.heroMainRow}>
             <View style={styles.heroCopy}>
-              <Text style={styles.heroTitle}>
-                Start a New Referral
-              </Text>
+              <Text style={styles.heroTitle}>Start a New Referral</Text>
               <Text style={styles.heroDescription}>
                 Earn up to <Text style={styles.rewardText}>₹25,000</Text> per deal
               </Text>
             </View>
 
-            {/* Gift and spinning reward coin - no house graphic */}
             <View style={styles.rewardIllustration}>
               <View style={styles.rewardIllustrationGlow} />
               <View style={styles.giftBackground}>
@@ -203,26 +266,21 @@ export default function ReferralHomeScreen({
               >
                 <MaterialCommunityIcons name="currency-inr" size={22} color="#9A6500" />
               </Animated.View>
-              <View style={styles.sparkleTwo}>
-                <MaterialCommunityIcons name="star-four-points" size={11} color="#079653" />
-              </View>
             </View>
           </View>
 
           <View style={styles.heroActions}>
             <Pressable
-              onPress={() => handleReferral("OWNER")}
+              onPress={() => handleOpenModal("OWNER")}
               style={({ pressed }) => [styles.heroPrimaryButton, pressed && styles.pressed]}
-              accessibilityRole="button"
             >
               <MaterialCommunityIcons name="office-building" size={18} color="#FFFFFF" />
               <Text style={styles.heroPrimaryButtonText} numberOfLines={1}>Refer a Property</Text>
               <MaterialCommunityIcons name="arrow-right" size={17} color="#FFFFFF" />
             </Pressable>
             <Pressable
-              onPress={() => handleReferral("CUSTOMER")}
+              onPress={() => handleOpenModal("CUSTOMER")}
               style={({ pressed }) => [styles.heroSecondaryButton, pressed && styles.pressed]}
-              accessibilityRole="button"
             >
               <MaterialCommunityIcons name="account-outline" size={18} color="#087D4A" />
               <Text style={styles.heroSecondaryButtonText} numberOfLines={1}>Refer a Customer</Text>
@@ -231,7 +289,7 @@ export default function ReferralHomeScreen({
           </View>
         </View>
 
-        {/* FOUR REWARD SUMMARY CARDS */}
+        {/* REWARD SUMMARY CARDS */}
         <View style={styles.statsGrid}>
           {rewardStats.map((stat) => (
             <View key={stat.label} style={styles.statCard}>
@@ -246,86 +304,43 @@ export default function ReferralHomeScreen({
         </View>
 
         {/* HOW IT WORKS */}
-
         <View style={styles.howSection}>
-
           <View style={styles.sectionHeading}>
             <View style={styles.headingLine} />
-
             <View>
-              <Text style={styles.sectionTitle}>
-                How It Works
-              </Text>
-
-              <Text style={styles.sectionSubtitle}>
-                Your referral journey in 5 simple steps
-              </Text>
+              <Text style={styles.sectionTitle}>How It Works</Text>
+              <Text style={styles.sectionSubtitle}>Your referral journey in 5 simple steps</Text>
             </View>
-
           </View>
 
-          {/* VERTICAL TIMELINE */}
-
           {steps.map((step, index) => (
-
-            <View
-              key={step.number}
-              style={styles.stepWrapper}
-            >
-
-              {/* TIMELINE */}
-
+            <View key={step.number} style={styles.stepWrapper}>
               <View style={styles.timeline}>
-
                 <View style={styles.numberCircle}>
-                  <Text style={styles.numberText}>
-                    {step.number}
-                  </Text>
+                  <Text style={styles.numberText}>{step.number}</Text>
                 </View>
-
-                {index !== steps.length - 1 && (
-                  <View style={styles.timelineLine} />
-                )}
-
+                {index !== steps.length - 1 && <View style={styles.timelineLine} />}
               </View>
-
-              {/* STEP CARD */}
 
               <View style={styles.stepCard}>
-
                 <View style={styles.stepIcon}>
-                  <MaterialCommunityIcons
-                    name={step.icon}
-                    size={29}
-                    color="#079653"
-                  />
+                  <MaterialCommunityIcons name={step.icon} size={29} color="#079653" />
                 </View>
-
                 <View style={styles.stepInformation}>
-
-                  <Text style={styles.stepTitle}>
-                    {step.title}
-                  </Text>
-
+                  <Text style={styles.stepTitle}>{step.title}</Text>
                 </View>
-
               </View>
-
             </View>
-
           ))}
-
         </View>
 
-        {/* YOUR ACTIVITY DASHBOARD - added from the previous implementation */}
+        {/* ACTIVITY DASHBOARD */}
         <View style={styles.activitySection}>
           <View style={styles.sectionHeading}>
             <View style={styles.headingLine} />
             <View>
               <Text style={styles.sectionTitle}>Your Activity Dashboard</Text>
-              <Text style={styles.sectionSubtitle}>
-                Track your submitted referrals and their progress
-              </Text>
+              <Text style={styles.sectionSubtitle}>Track your submitted referrals and their progress</Text>
             </View>
           </View>
 
@@ -345,17 +360,9 @@ export default function ReferralHomeScreen({
                 <Pressable
                   key={type}
                   onPress={() => setActivityTypeFilter(type)}
-                  style={[
-                    styles.activityFilterButton,
-                    active && styles.activityFilterButtonActive,
-                  ]}
+                  style={[styles.activityFilterButton, active && styles.activityFilterButtonActive]}
                 >
-                  <Text
-                    style={[
-                      styles.activityFilterText,
-                      active && styles.activityFilterTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.activityFilterText, active && styles.activityFilterTextActive]}>
                     {type}
                   </Text>
                 </Pressable>
@@ -371,17 +378,9 @@ export default function ReferralHomeScreen({
                 <Pressable
                   key={status}
                   onPress={() => setActivityFilter(status)}
-                  style={[
-                    styles.activityFilterButton,
-                    active && styles.activityFilterButtonActive,
-                  ]}
+                  style={[styles.activityFilterButton, active && styles.activityFilterButtonActive]}
                 >
-                  <Text
-                    style={[
-                      styles.activityFilterText,
-                      active && styles.activityFilterTextActive,
-                    ]}
-                  >
+                  <Text style={[styles.activityFilterText, active && styles.activityFilterTextActive]}>
                     {status}
                   </Text>
                 </Pressable>
@@ -410,76 +409,307 @@ export default function ReferralHomeScreen({
             ))
           ) : (
             <View style={styles.activityEmptyCard}>
-              <MaterialCommunityIcons
-                name="clipboard-text-search-outline"
-                size={30}
-                color="#8A96A5"
-              />
-              <Text style={styles.activityEmptyText}>
-                No referrals found.
-              </Text>
+              <MaterialCommunityIcons name="clipboard-text-search-outline" size={30} color="#8A96A5" />
+              <Text style={styles.activityEmptyText}>No referrals found.</Text>
             </View>
           )}
         </View>
-
       </ScrollView>
 
-      <BottomNavBar activeTab="menu" />
-    </SafeAreaView>
+      {/* REFER PROPERTY MODAL */}
+      <Modal
+        visible={propertyModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setPropertyModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalEmeraldHeader}>
+              <View style={styles.modalHeaderTopRow}>
+                <Animated.View style={[styles.headerIconBox, { transform: [{ scale: formIconScale }] }]}>
+                  <MaterialCommunityIcons name="office-building" size={22} color="#079653" />
+                </Animated.View>
+                <Text style={styles.modalHeaderStepText}>01 / PROPERTY REFERRAL</Text>
+                <Pressable onPress={() => setPropertyModalVisible(false)} style={styles.closeIconButton}>
+                  <MaterialCommunityIcons name="close" size={22} color="#FFFFFF" />
+                </Pressable>
+              </View>
+              <Text style={styles.modalHeaderSubtitle}>
+                Help property owners connect with verified buyers and tenants through GatedPlus.
+              </Text>
+              <View style={styles.headerTrustPill}><MaterialCommunityIcons name="shield-check" size={13} color="#BCEFD3" /><Text style={styles.headerTrustText}>PRIVATE & SECURE REFERRAL</Text></View>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScroll}>
+              <Text style={styles.inputLabel}>Owner Full Name *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="account-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="Enter owner's full name"
+                  placeholderTextColor="#8A96A5"
+                  value={ownerName}
+                  onChangeText={setOwnerName}
+                />
+              </View>
+
+              <Text style={styles.inputLabel}>Mobile Number *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="phone-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <Text style={styles.countryCode}>+91</Text>
+                <View style={styles.verticalDivider} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="10-digit mobile number"
+                  placeholderTextColor="#8A96A5"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={ownerMobile}
+                  onChangeText={setOwnerMobile}
+                />
+              </View>
+
+              {/* Sub-section box */}
+              <View style={styles.subInfoBox}>
+                <View style={styles.subInfoIconWrap}>
+                  <MaterialCommunityIcons name="home-search-outline" size={22} color="#079653" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.subInfoTitle}>Property Information</Text>
+                  <Text style={styles.subInfoSubtitle}>Tell us about the property you want to refer.</Text>
+                </View>
+              </View>
+
+              <Text style={styles.inputLabel}>Property Location *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="map-marker-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="Enter area, city or locality"
+                  placeholderTextColor="#8A96A5"
+                  value={propertyLocation}
+                  onChangeText={setPropertyLocation}
+                />
+              </View>
+
+              <Text style={styles.inputLabel}>Property Type *</Text>
+              <View style={styles.propertyGrid}>
+                {propertyTypes.map((item) => {
+                  const isSelected = selectedPropertyType === item.label;
+                  return (
+                    <Pressable
+                      key={item.label}
+                      style={[styles.propertyGridCard, isSelected && styles.propertyGridCardSelected]}
+                      onPress={() => setSelectedPropertyType(item.label)}
+                    >
+                      <View style={[styles.propertyGridIconWrap, isSelected && styles.propertyGridIconWrapSelected]}>
+                        <Animated.View style={isSelected ? { transform: [{ scale: formIconScale }] } : undefined}>
+                          <MaterialCommunityIcons name={item.icon} size={24} color={isSelected ? "#079653" : "#526176"} />
+                        </Animated.View>
+                      </View>
+                      <Text style={[styles.propertyGridText, isSelected && styles.propertyGridTextSelected]}>
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Text style={styles.inputLabel}>Additional Notes (Optional)</Text>
+              <TextInput
+                style={[styles.textInputWithIcon, styles.textArea]}
+                placeholder="Any specific details regarding the property..."
+                placeholderTextColor="#8A96A5"
+                multiline
+                numberOfLines={3}
+                value={ownerNotes}
+                onChangeText={setOwnerNotes}
+              />
+
+              <Pressable
+                style={({ pressed }) => [styles.submitButton, pressed && styles.pressed]}
+                onPress={submitPropertyReferral}
+              >
+                <MaterialCommunityIcons name="send-check-outline" size={19} color="#FFFFFF" />
+                <Text style={styles.submitButtonText}>Submit Property Referral</Text>
+                <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
+              </Pressable>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* REFER CUSTOMER MODAL */}
+      <Modal
+        visible={customerModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setCustomerModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalEmeraldHeader}>
+              <View style={styles.modalHeaderTopRow}>
+                <Animated.View style={[styles.headerIconBox, { transform: [{ scale: formIconScale }] }]}>
+                  <MaterialCommunityIcons name="account-outline" size={22} color="#079653" />
+                </Animated.View>
+                <Text style={styles.modalHeaderStepText}>02 / CUSTOMER REFERRAL</Text>
+                <Pressable onPress={() => setCustomerModalVisible(false)} style={styles.closeIconButton}>
+                  <MaterialCommunityIcons name="close" size={22} color="#FFFFFF" />
+                </Pressable>
+              </View>
+              <Text style={styles.modalHeaderSubtitle}>
+                Refer home seekers or tenants looking to rent or buy their next ideal home.
+              </Text>
+              <View style={styles.headerTrustPill}><MaterialCommunityIcons name="shield-check" size={13} color="#BCEFD3" /><Text style={styles.headerTrustText}>PRIVATE & SECURE REFERRAL</Text></View>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScroll}>
+              <Text style={styles.inputLabel}>Customer Full Name *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="account-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="Enter customer's full name"
+                  placeholderTextColor="#8A96A5"
+                  value={customerName}
+                  onChangeText={setCustomerName}
+                />
+              </View>
+
+              <Text style={styles.inputLabel}>Mobile Number *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="phone-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <Text style={styles.countryCode}>+91</Text>
+                <View style={styles.verticalDivider} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="10-digit mobile number"
+                  placeholderTextColor="#8A96A5"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  value={customerMobile}
+                  onChangeText={setCustomerMobile}
+                />
+              </View>
+
+              <View style={styles.subInfoBox}>
+                <View style={styles.subInfoIconWrap}>
+                  <MaterialCommunityIcons name="map-search-outline" size={22} color="#079653" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.subInfoTitle}>Requirement Information</Text>
+                  <Text style={styles.subInfoSubtitle}>Specify the location and property style needed.</Text>
+                </View>
+              </View>
+
+              <Text style={styles.inputLabel}>Desired Area / Location *</Text>
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="map-marker-outline" size={20} color="#079653" style={styles.fieldIcon} />
+                <TextInput
+                  style={styles.textInputWithIcon}
+                  placeholder="e.g. Gachibowli, Hyderabad"
+                  placeholderTextColor="#8A96A5"
+                  value={desiredArea}
+                  onChangeText={setDesiredArea}
+                />
+              </View>
+
+              <Text style={styles.inputLabel}>Property Type Needed *</Text>
+              <View style={styles.propertyGrid}>
+                {propertyTypes.map((item) => {
+                  const isSelected = customerPropertyType === item.label;
+                  return (
+                    <Pressable
+                      key={item.label}
+                      style={[styles.propertyGridCard, isSelected && styles.propertyGridCardSelected]}
+                      onPress={() => setCustomerPropertyType(item.label)}
+                    >
+                      <View style={[styles.propertyGridIconWrap, isSelected && styles.propertyGridIconWrapSelected]}>
+                        <Animated.View style={isSelected ? { transform: [{ scale: formIconScale }] } : undefined}>
+                          <MaterialCommunityIcons name={item.icon} size={24} color={isSelected ? "#079653" : "#526176"} />
+                        </Animated.View>
+                      </View>
+                      <Text style={[styles.propertyGridText, isSelected && styles.propertyGridTextSelected]}>
+                        {item.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Text style={styles.inputLabel}>Monthly Budget *</Text>
+              <Pressable
+                style={styles.dropdownSelector}
+                onPress={() => setBudgetDropdownVisible(!budgetDropdownVisible)}
+              >
+                <MaterialCommunityIcons name="currency-inr" size={20} color="#079653" style={{ marginRight: 8 }} />
+                <Text style={[styles.dropdownTextSelected, !customerBudget && { color: "#8A96A5" }]}>
+                  {customerBudget || "Select Budget Range"}
+                </Text>
+                <MaterialCommunityIcons name="chevron-down" size={20} color="#526176" />
+              </Pressable>
+
+              {budgetDropdownVisible && (
+                <View style={styles.dropdownList}>
+                  {budgetOptions.map((budget) => (
+                    <Pressable
+                      key={budget}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setCustomerBudget(budget);
+                        setBudgetDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{budget}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              <Text style={styles.inputLabel}>Additional Notes (Optional)</Text>
+              <TextInput
+                style={[styles.textInputWithIcon, styles.textArea]}
+                placeholder="Specific preferences or timeline..."
+                placeholderTextColor="#8A96A5"
+                multiline
+                numberOfLines={3}
+                value={customerNotes}
+                onChangeText={setCustomerNotes}
+              />
+
+              <Pressable
+                style={({ pressed }) => [styles.submitButton, pressed && styles.pressed]}
+                onPress={submitCustomerReferral}
+              >
+                <MaterialCommunityIcons name="send-check-outline" size={19} color="#FFFFFF" />
+                <Text style={styles.submitButtonText}>Submit Customer Referral</Text>
+                <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
+              </Pressable>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-
-  // MAIN CONTAINER
-
   container: {
     flex: 1,
     backgroundColor: "#F8FBF9",
   },
-
-  // HEADER
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E9EEF3',
-  },
-
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  headerText: {
-    flex: 1,
-    marginLeft: 10,
-  },
-
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#142238',
-  },
-
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#778397',
-    marginTop: 2,
-  },
-
   scrollContent: {
     padding: 16,
     paddingBottom: 30,
   },
-
-  // PREMIUM HERO SECTION
   heroCard: {
     backgroundColor: "#E7F8EF",
     borderRadius: 26,
@@ -586,11 +816,6 @@ const styles = StyleSheet.create({
     zIndex: 3,
     elevation: 4,
   },
-  sparkleTwo: {
-    position: "absolute",
-    bottom: 13,
-    left: 4,
-  },
   heroActions: {
     flexDirection: "row",
     gap: 9,
@@ -639,50 +864,39 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     flexShrink: 1,
   },
-  // HOW IT WORKS
-
   howSection: {
     marginBottom: 15,
   },
-
   sectionHeading: {
     flexDirection: "row",
     alignItems: "center",
     gap: 11,
     marginBottom: 22,
   },
-
   headingLine: {
     width: 5,
     height: 35,
     borderRadius: 5,
     backgroundColor: "#079653",
   },
-
   sectionTitle: {
     fontSize: 23,
     fontWeight: "800",
     color: "#152238",
   },
-
   sectionSubtitle: {
     fontSize: 12,
     color: "#778397",
     marginTop: 3,
   },
-
-  // TIMELINE
-
   stepWrapper: {
     flexDirection: "row",
     minHeight: 82,
   },
-
   timeline: {
     width: 48,
     alignItems: "center",
   },
-
   numberCircle: {
     width: 40,
     height: 40,
@@ -692,13 +906,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 1,
   },
-
   numberText: {
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "800",
   },
-
   timelineLine: {
     position: "absolute",
     top: 40,
@@ -706,9 +918,6 @@ const styles = StyleSheet.create({
     width: 2,
     backgroundColor: "#A9E8C4",
   },
-
-  // STEP CARD
-
   stepCard: {
     flex: 1,
     flexDirection: "row",
@@ -724,12 +933,8 @@ const styles = StyleSheet.create({
     shadowColor: "#000000",
     shadowOpacity: 0.03,
     shadowRadius: 4,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
   },
-
   stepIcon: {
     width: 46,
     height: 46,
@@ -738,21 +943,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   stepInformation: {
     flex: 1,
     marginLeft: 12,
   },
-
   stepTitle: {
     fontSize: 15,
     fontWeight: "800",
     color: "#172238",
     lineHeight: 21,
   },
-
-
-  // REWARD SUMMARY CARDS
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -797,8 +997,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     marginTop: 7,
   },
-
-  // YOUR ACTIVITY DASHBOARD
   activitySection: {
     marginTop: 18,
     marginBottom: 20,
@@ -907,7 +1105,292 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.78,
   },
-
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    maxHeight: "90%",
+    paddingBottom: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.7)",
+  },
+  modalEmeraldHeader: {
+    backgroundColor: "#087D4A",
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 20,
+  },
+  modalHeaderTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 13,
+  },
+  headerIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#F2FBF6",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.65)",
+    shadowColor: "#003D24",
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  modalHeaderStepText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 1,
+    flex: 1,
+    textAlign: "center",
+    marginHorizontal: 8,
+  },
+  closeIconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  modalHeaderSubtitle: {
+    color: "#E5F5EC",
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 15,
+    fontWeight: "500",
+  },
+  headerTrustPill: {
+    alignSelf: "flex-start",
+    minHeight: 27,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    backgroundColor: "rgba(0,54,31,0.25)",
+    borderWidth: 1,
+    borderColor: "rgba(213,247,227,0.15)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  headerTrustText: {
+    color: "#D9F3E3",
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+  },
+  modalScroll: {
+    paddingHorizontal: 20,
+    paddingTop: 13,
+    paddingBottom: 22,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#1C2B3D",
+    marginBottom: 9,
+    marginTop: 16,
+    letterSpacing: 0.1,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 58,
+    backgroundColor: "#F8FAF9",
+    borderWidth: 1,
+    borderColor: "#E3EBE6",
+    borderRadius: 16,
+    paddingHorizontal: 15,
+    shadowColor: "#183B2A",
+    shadowOpacity: 0.025,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  fieldIcon: {
+    marginRight: 10,
+  },
+  countryCode: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#334155",
+    marginRight: 8,
+  },
+  verticalDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "#D1DCD6",
+    marginRight: 10,
+  },
+  textInputWithIcon: {
+    flex: 1,
+    paddingVertical: 15,
+    fontSize: 14,
+    color: "#172238",
+  },
+  textArea: {
+    backgroundColor: "#F8FBF9",
+    borderWidth: 1,
+    borderColor: "#E5ECE8",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    height: 80,
+    textAlignVertical: "top",
+  },
+  subInfoBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFF9F3",
+    borderWidth: 1,
+    borderColor: "#D7EEE0",
+    borderRadius: 18,
+    padding: 14,
+    marginTop: 21,
+    marginBottom: 3,
+    gap: 13,
+  },
+  subInfoIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  subInfoTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#172238",
+  },
+  subInfoSubtitle: {
+    fontSize: 11,
+    color: "#526176",
+    marginTop: 2,
+  },
+  propertyGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 4,
+  },
+  propertyGridCard: {
+    width: "48%",
+    flexGrow: 1,
+    minHeight: 118,
+    backgroundColor: "#FBFCFB",
+    borderWidth: 1,
+    borderColor: "#E3EBE6",
+    borderRadius: 18,
+    padding: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  propertyGridCardSelected: {
+    backgroundColor: "#F0FAF4",
+    borderColor: "#079653",
+    borderWidth: 1.5,
+    shadowColor: "#087D4A",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
+  },
+  propertyGridIconWrap: {
+    width: 50,
+    height: 50,
+    borderRadius: 17,
+    backgroundColor: "#F0F5F2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#E3EBE6",
+  },
+  propertyGridIconWrapSelected: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#BFE5CD",
+  },
+  propertyGridText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#526176",
+    textAlign: "center",
+  },
+  propertyGridTextSelected: {
+    color: "#078747",
+    fontWeight: "800",
+  },
+  dropdownSelector: {
+    minHeight: 58,
+    backgroundColor: "#F8FAF9",
+    borderWidth: 1,
+    borderColor: "#E3EBE6",
+    borderRadius: 16,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dropdownTextSelected: {
+    color: "#172238",
+    fontSize: 14,
+    fontWeight: "600",
+    flex: 1,
+  },
+  dropdownList: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5ECE8",
+    borderRadius: 14,
+    marginTop: 6,
+    overflow: "hidden",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F3",
+  },
+  dropdownItemText: {
+    fontSize: 13,
+    color: "#334155",
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#087D4A",
+    borderRadius: 16,
+    paddingVertical: 17,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 24,
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: "#087D4A",
+    shadowOpacity: 0.22,
+    shadowRadius: 9,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "900",
+  },
 });
-
-export { ReferralHomeScreen as ReferAndEarnPage };

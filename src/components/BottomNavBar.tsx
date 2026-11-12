@@ -47,12 +47,6 @@ export const DEFAULT_TABS: TabItem[] = [
     isCenterButton: true,
   },
   {
-    key: 'activity',
-    label: 'Activity',
-    icon: 'heart-outline',
-    activeIcon: 'heart',
-  },
-  {
     key: 'menu',
     label: 'Menu',
     icon: 'menu',

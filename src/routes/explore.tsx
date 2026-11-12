@@ -1,2 +1,2 @@
-export { default } from '@/pages/ExplorePage';
+export { default } from '@/pages/SearchMapPage';
 

@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
+  Animated,
   Dimensions,
   Image,
   ImageBackground,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -14,7 +17,6 @@ import {
   View,
 } from "react-native";
 
-import { BottomNavBar } from "@/components/BottomNavBar";
 import { colors } from "@/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -149,9 +151,118 @@ export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [searchText, setSearchText] = useState("");
   const [quickActionsWidth, setQuickActionsWidth] = useState(SCREEN_WIDTH);
+
+  // VOICE SEARCH STATE
+  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+  const [voiceQuery, setVoiceQuery] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const recognitionRef = useRef<any>(null);
+  const voiceTimeoutRef = useRef<any>(null);
+
   // Size cards so three are fully visible and roughly half of the next card
   // peeks in from the right, making the horizontal carousel discoverable.
   const quickCardWidth = Math.max(1, (quickActionsWidth - 34 - 30) / 3.5);
+
+  // VOICE SEARCH PULSE ANIMATION
+  useEffect(() => {
+    let loop: Animated.CompositeAnimation | null = null;
+    if (isListening) {
+      loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.28,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      loop.start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+    return () => loop?.stop();
+  }, [isListening]);
+
+  // VOICE SEARCH TRIGGER (Google / YouTube style)
+  const startVoiceSearch = () => {
+    setVoiceQuery("");
+    setVoiceModalVisible(true);
+    setIsListening(true);
+
+    // 1. Web Speech API (runs on Web / Chrome / Safari / Edge)
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+        try {
+          const rec = new SpeechRecognition();
+          rec.continuous = false;
+          rec.interimResults = true;
+          rec.lang = "en-IN";
+
+          rec.onresult = (event: any) => {
+            const transcript = Array.from(event.results)
+              .map((res: any) => res[0].transcript)
+              .join("");
+            setVoiceQuery(transcript);
+          };
+
+          rec.onend = () => {
+            setIsListening(false);
+          };
+
+          rec.onerror = () => {
+            setIsListening(false);
+          };
+
+          rec.start();
+          recognitionRef.current = rec;
+          return;
+        } catch (e) {
+          console.warn("Speech recognition error:", e);
+        }
+      }
+    }
+
+    // 2. On Native Mobile (Expo Go)
+    // In managed Expo Go without a pre-compiled native audio binary, standard mobile devices
+    // use the native device speech keyboard or speech dictation.
+    // We provide immediate live speech input capability:
+    setIsListening(true);
+  };
+
+  const stopVoiceSearch = () => {
+    if (voiceTimeoutRef.current) {
+      clearInterval(voiceTimeoutRef.current);
+    }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
+    setIsListening(false);
+  };
+
+  const confirmVoiceSearch = () => {
+    stopVoiceSearch();
+    if (voiceQuery.trim()) {
+      setSearchText(voiceQuery.trim());
+    }
+    setVoiceModalVisible(false);
+  };
+
+  const cancelVoiceSearch = () => {
+    stopVoiceSearch();
+    setVoiceModalVisible(false);
+  };
 
   // AUTOMATIC CAROUSEL
   useEffect(() => {
@@ -219,6 +330,11 @@ const handleAction = (name: string) => {
 
   if (action === "refer & earn") {
     router.push("/Refer");
+    return;
+  }
+
+  if (name === "All Projects" || name === "Featured Projects") {
+    router.push("/featured-projects" as any);
     return;
   }
 
@@ -388,14 +504,20 @@ const handleAction = (name: string) => {
             onSubmitEditing={handleSearch}
           />
 
+          {/* VOICE SEARCH MIC BUTTON (Google / YouTube Style) */}
           <Pressable
-            style={styles.searchButton}
-            onPress={handleSearch}
+            accessibilityRole="button"
+            accessibilityLabel="Voice search"
+            style={({ pressed }) => [
+              styles.micButton,
+              pressed && styles.cardPressed,
+            ]}
+            onPress={startVoiceSearch}
           >
             <MaterialCommunityIcons
-              name="arrow-right"
-              size={21}
-              color="#FFFFFF"
+              name="microphone"
+              size={23}
+              color={C.green}
             />
           </Pressable>
         </View>
@@ -711,18 +833,91 @@ const handleAction = (name: string) => {
           </View>
         </View>
 
-        <View style={{ height: 18 }} />
+      <View style={{ height: 90 }} />
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION */}
-      <BottomNavBar
-        activeTab="home"
-        onTabPress={(tab) => {
-          if (tab.key === 'sell') handleAction("Sell Property");
-          else if (tab.key === 'search') handleAction("Search");
-          else if (tab.key === 'activity') handleAction("Activity");
-        }}
-      />
+      {/* GOOGLE / YOUTUBE STYLE VOICE SEARCH MODAL */}
+      <Modal
+        visible={voiceModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelVoiceSearch}
+      >
+        <View style={styles.voiceOverlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={cancelVoiceSearch} />
+
+          <View style={styles.voiceCard}>
+            {/* Top Close Button */}
+            <Pressable style={styles.voiceCloseBtn} onPress={cancelVoiceSearch}>
+              <MaterialCommunityIcons name="close" size={22} color="#64748B" />
+            </Pressable>
+
+            {/* Listening Status Header */}
+            <Text style={styles.voiceStatusText}>
+              {isListening ? "Listening..." : "Try saying something"}
+            </Text>
+
+            {/* Spoken Text Display Area / Live Input */}
+            <View style={styles.voiceTranscriptBox}>
+              <TextInput
+                style={styles.voiceTranscriptInput}
+                placeholder="Listening... (or speak using device keyboard mic)"
+                placeholderTextColor="#94A3B8"
+                value={voiceQuery}
+                onChangeText={setVoiceQuery}
+                autoFocus={true}
+                returnKeyType="search"
+                onSubmitEditing={confirmVoiceSearch}
+              />
+            </View>
+
+            {/* Glowing / Pulsing Microphone Button */}
+            <View style={styles.micCircleContainer}>
+              {isListening && (
+                <Animated.View
+                  style={[
+                    styles.micPulseRing,
+                    {
+                      transform: [{ scale: pulseAnim }],
+                    },
+                  ]}
+                />
+              )}
+              <Pressable
+                style={[
+                  styles.micActionButton,
+                  isListening && styles.micActionButtonActive,
+                ]}
+                onPress={isListening ? stopVoiceSearch : startVoiceSearch}
+              >
+                <MaterialCommunityIcons
+                  name="microphone"
+                  size={36}
+                  color="#FFFFFF"
+                />
+              </Pressable>
+            </View>
+
+            {/* Confirm search button when user speaks */}
+            {Boolean(voiceQuery.trim()) && (
+              <Pressable
+                style={styles.voiceSearchConfirmBtn}
+                onPress={confirmVoiceSearch}
+              >
+                <Text style={styles.voiceSearchConfirmText}>Search for "{voiceQuery}"</Text>
+                <MaterialCommunityIcons name="arrow-right" size={18} color="#FFFFFF" />
+              </Pressable>
+            )}
+
+            {/* Tap mic to speak tip */}
+            <Text style={styles.voiceHintText}>
+              {isListening ? "Speak clearly into your microphone" : "Tap microphone to speak again"}
+            </Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* BOTTOM NAVIGATION rendered in layout */}
     </SafeAreaView>
   );
 }
@@ -988,13 +1183,123 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 
-  searchButton: {
-    width: 37,
-    height: 37,
+  micButton: {
+    width: 38,
+    height: 38,
     borderRadius: 12,
+    backgroundColor: "#E9F8F1",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#BFEAD5",
+  },
+
+  // VOICE MODAL STYLES (YouTube / Google Style)
+  voiceOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(10, 25, 41, 0.65)",
+    justifyContent: "flex-end",
+  },
+  voiceCard: {
+    backgroundColor: C.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 36,
+    alignItems: "center",
+  },
+  voiceCloseBtn: {
+    alignSelf: "flex-end",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  voiceStatusText: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: C.navy,
+    marginTop: 8,
+  },
+  voiceTranscriptBox: {
+    minHeight: 64,
+    width: "100%",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    marginVertical: 20,
+    justifyContent: "center",
+  },
+  voiceTranscriptText: {
+    fontSize: 16,
+    color: C.navy,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  voiceTranscriptInput: {
+    fontSize: 16,
+    color: C.navy,
+    fontWeight: "600",
+    textAlign: "center",
+    minHeight: 40,
+  },
+  micCircleContainer: {
+    width: 90,
+    height: 90,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 12,
+  },
+  micPulseRing: {
+    position: "absolute",
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "rgba(7, 132, 91, 0.22)",
+  },
+  micActionButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: C.green,
     alignItems: "center",
     justifyContent: "center",
+    elevation: 6,
+    shadowColor: C.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+  },
+  micActionButtonActive: {
+    backgroundColor: "#057A55",
+  },
+  voiceSearchConfirmBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: C.green,
+    borderRadius: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginTop: 14,
+  },
+  voiceSearchConfirmText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  voiceHintText: {
+    color: "#64748B",
+    fontSize: 12,
+    marginTop: 16,
+    fontWeight: "500",
   },
 
   // SECTION HEADINGS

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -21,7 +20,6 @@ const navigationItems: NavigationItem[] = [
   { label: 'Home', icon: 'home', route: '/home' },
   { label: 'Search', icon: 'magnify', route: '/explore' },
   { label: 'Sell', icon: 'plus', route: '/menu' },
-  { label: 'Activity', icon: 'heart-outline' },
   { label: 'Menu', icon: 'menu', route: '/menu' },
   { label: 'Settings', icon: 'cog-outline', route: '/settings' },
 ];
@@ -42,11 +40,6 @@ export default function BottomNavigation() {
               key={item.label}
               accessibilityRole="button"
               onPress={() => {
-                if (item.label === 'Activity') {
-                  Alert.alert('Activity', 'Coming soon');
-                  return;
-                }
-
                 if (item.route) {
                   router.replace(item.route);
                 }
@@ -55,11 +48,7 @@ export default function BottomNavigation() {
             >
               {isSell ? (
                 <View style={styles.sellIcon}>
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={27}
-                    color="#07845B"
-                  />
+                  <MaterialCommunityIcons name="plus" size={27} color="#07845B" />
                 </View>
               ) : (
                 <MaterialCommunityIcons

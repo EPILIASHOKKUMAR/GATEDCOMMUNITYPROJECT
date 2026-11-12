@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,11 +20,6 @@ export default function BottomNavigation() {
     { label: 'Home', icon: 'home', route: '/home' },
     { label: 'Search', icon: 'magnify', route: '/explore' },
     { label: 'Sell', icon: 'plus', route: '/menu' },
-    {
-      label: 'Activity',
-      icon: 'heart-outline',
-      action: () => Alert.alert('Activity', 'Coming soon'),
-    },
     { label: 'Menu', icon: 'menu', route: '/menu' },
     { label: 'Settings', icon: 'cog-outline', route: '/settings' },
   ];
@@ -58,11 +53,7 @@ export default function BottomNavigation() {
             >
               {isSell ? (
                 <View style={[styles.sellIcon, active && styles.sellIconActive]}>
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={25}
-                    color={colors.primary}
-                  />
+                  <MaterialCommunityIcons name="plus" size={25} color={colors.primary} />
                 </View>
               ) : (
                 <MaterialCommunityIcons

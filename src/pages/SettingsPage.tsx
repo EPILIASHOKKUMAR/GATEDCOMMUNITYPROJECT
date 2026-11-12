@@ -8,7 +8,6 @@ import TabHeader from '@/components/TabHeader';
 import Avatar from '@/components/Avatar';
 import ListRow from '@/components/ListRow';
 import AppButton from '@/components/AppButton';
-import { BottomNavBar } from '@/components/BottomNavBar';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsPage() {
@@ -35,7 +34,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top']}>
       <StatusBar barStyle="dark-content" />
 
       <ScrollView
@@ -113,8 +112,7 @@ export default function SettingsPage() {
         </View>
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION BAR */}
-      <BottomNavBar activeTab="settings" />
+      {/* BOTTOM NAVIGATION rendered in layout */}
     </SafeAreaView>
   );
 }
@@ -124,7 +122,7 @@ export { SettingsPage, SettingsPage as SettingsScreen };
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
   mainScroll: { flex: 1 },
-  content: { paddingBottom: spacing.xl },
+  content: { paddingBottom: 90 },
   body: { paddingHorizontal: spacing.lg },
   title: { ...typography.h1, color: colors.textPrimary, marginBottom: spacing.md },
   pressed: { opacity: 0.75 },

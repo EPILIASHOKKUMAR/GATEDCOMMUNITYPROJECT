@@ -1,4 +1,3 @@
-import { BottomNavBar, type TabItem } from '@/components/BottomNavBar';
 import { ServicesPanel } from '@/components/ServicesPanel';
 import { colors, radii } from '@/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -147,15 +146,6 @@ export default function MenuPage() {
     content.current?.scrollTo({ y: 0, animated: false });
   }
 
-  const menuTabs: TabItem[] = [
-    { key: 'home', label: 'Home', icon: 'home-outline', route: '/home' },
-    { key: 'services', label: 'Services', icon: 'view-grid-outline', onPress: () => selectCategory(4) },
-    { key: 'post', label: 'Post', icon: 'plus-circle-outline', onPress: () => selectCategory(0) },
-    { key: 'activity', label: 'Activity', icon: 'heart-outline', onPress: () => setDetail({ title: 'Saved Properties', icon: 'heart-outline', description: 'Keep your favourite properties together for easy comparison.' }) },
-    { key: 'menu', label: 'Menu', icon: 'menu', activeIcon: 'menu', route: '/menu' },
-    { key: 'settings', label: 'Settings', icon: 'cog-outline', activeIcon: 'cog', route: '/settings' },
-  ];
-
   return (
     <SafeAreaView style={s.screen} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
@@ -247,7 +237,7 @@ onPress={() => {
           ))}
         </ScrollView>
       </View>
-      <BottomNavBar activeTab="menu" tabs={menuTabs} />
+      {/* BOTTOM NAVIGATION rendered in layout */}
       <Modal
         visible={detail !== null}
         transparent
@@ -313,7 +303,7 @@ const s = StyleSheet.create({
   categoryLabel: { textAlign: 'center', color: '#63707C', fontSize: 12, lineHeight: 18 },
   categoryLabelActive: { color: colors.primary, fontWeight: '700' },
   content: { flex: 1 },
-  contentInner: { paddingHorizontal: 12, paddingTop: 23, paddingBottom: 32 },
+  contentInner: { paddingHorizontal: 12, paddingTop: 23, paddingBottom: 90 },
   group: { marginBottom: 28 },
   groupTitle: {
     color: colors.textMuted,
